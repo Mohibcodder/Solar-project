@@ -1,28 +1,14 @@
 import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    enum: ['customer', 'technician', 'admin'],
-    required: true,
-  },
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, enum: ['customer', 'technician', 'admin'], required: true },
   profile: {
-      phone: String,
+      phone: { type: String }, // Phone field added
       address: String,
-      expertise: String, // For technicians
+      expertise: String,
       profilePicture: String,
   }
 }, { timestamps: true });

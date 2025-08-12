@@ -3,14 +3,14 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
-import { LayoutDashboard, Book, Users, BarChart } from 'lucide-react';
+import { LayoutDashboard, Book, Users } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const [user, setUser] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [technicians, setTechnicians] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [selectedTechnician, setSelectedTechnician] = useState('');
+  const [stats, setStats] = useState({ customers: 0, technicians: 0 });
   const router = useRouter();
 
   useEffect(() => {
@@ -19,7 +19,6 @@ export default function AdminDashboard() {
       router.push('/login');
       return;
     }
-    setUser(userData);
     fetchData();
   }, [router]);
 
@@ -28,8 +27,16 @@ export default function AdminDashboard() {
     try {
       const bookingsRes = await axios.get('/api/bookings', { headers: { Authorization: `Bearer ${token}` } });
       setBookings(bookingsRes.data.data);
+      
       const techsRes = await axios.get('/api/users/technicians', { headers: { Authorization: `Bearer ${token}` } });
       setTechnicians(techsRes.data.data);
+
+      // Naya API call saare users ke counts ke liye
+      const allUsersRes = await axios.get('/api/users/all', { headers: { Authorization: `Bearer ${token}` } });
+      const customersCount = allUsersRes.data.data.filter(u => u.role === 'customer').length;
+      const techniciansCount = allUsersRes.data.data.filter(u => u.role === 'technician').length;
+      setStats({ customers: customersCount, technicians: techniciansCount });
+
     } catch (error) {
       toast.error("Could not fetch dashboard data.");
     }
@@ -50,9 +57,24 @@ export default function AdminDashboard() {
         toast.success("Technician assigned successfully!", { id: loadingToast });
         setSelectedBooking(null);
         setSelectedTechnician('');
-        fetchData(); // Refresh data
+        fetchData(); // Data refresh karein
     } catch (error) {
         toast.error("Assignment failed.", { id: loadingToast });
+    }
+  };
+
+  const handleApprovePayment = async (bookingId) => {
+    const token = localStorage.getItem('token');
+    const loadingToast = toast.loading("Approving payment...");
+    try {
+        await axios.put(`/api/bookings/${bookingId}`, 
+            { payment: { status: 'Paid' } },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        toast.success("Payment approved!", { id: loadingToast });
+        fetchData(); // Data refresh karein taake status update ho jaye
+    } catch (error) {
+        toast.error("Approval failed.", { id: loadingToast });
     }
   };
   
@@ -69,21 +91,33 @@ export default function AdminDashboard() {
           <h1 className="text-xl font-bold mb-8">Admin Panel</h1>
           <nav className="space-y-2">
             <a href="#" className="flex items-center p-2 text-gray-700 bg-gray-200 rounded-lg"><LayoutDashboard className="mr-3"/>Dashboard</a>
-            <a href="#" className="flex items-center p-2 text-gray-600 hover:bg-gray-200 rounded-lg"><Book className="mr-3"/>Bookings</a>
           </nav>
           <button onClick={handleLogout} className="w-full mt-8 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">Logout</button>
         </aside>
 
         <main className="flex-1 p-8">
-          <h2 className="text-3xl font-bold mb-6">Manage Bookings</h2>
+          <h2 className="text-3xl font-bold mb-6">Admin Dashboard</h2>
+          
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white p-6 rounded-lg shadow">
+                <h4 className="text-gray-500 flex items-center"><Users className="mr-2"/> Total Customers</h4>
+                <p className="text-3xl font-bold">{stats.customers}</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+                <h4 className="text-gray-500 flex items-center"><Users className="mr-2"/> Total Technicians</h4>
+                <p className="text-3xl font-bold">{stats.technicians}</p>
+            </div>
+          </div>
+
+          <h3 className="text-2xl font-bold mb-4">Manage Bookings</h3>
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-gray-50">
                     <th className="p-3">Customer</th>
-                    <th className="p-3">Service</th>
-                    <th className="p-3">Date</th>
+                    <th className="p-3">Payment (TID)</th>
                     <th className="p-3">Status</th>
                     <th className="p-3">Technician</th>
                     <th className="p-3">Action</th>
@@ -93,14 +127,21 @@ export default function AdminDashboard() {
                   {bookings.map(booking => (
                     <tr key={booking._id} className="border-b">
                       <td className="p-3">{booking.customer?.name || 'N/A'}</td>
-                      <td className="p-3">{booking.serviceType}</td>
-                      <td className="p-3">{new Date(booking.bookingDate).toLocaleDateString()}</td>
-                      <td className="p-3">{booking.status}</td>
-                      <td className="p-3">{booking.technician?.name || 'Not Assigned'}</td>
                       <td className="p-3">
+                        {booking.payment.method} 
+                        {booking.payment.paymentId && ` (${booking.payment.paymentId})`}
+                      </td>
+                      <td className="p-3">{booking.payment.status}</td>
+                      <td className="p-3">{booking.technician?.name || 'Not Assigned'}</td>
+                      <td className="p-3 space-x-2">
                         {booking.status === 'Pending' && (
                           <button onClick={() => setSelectedBooking(booking)} className="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm">
                             Assign
+                          </button>
+                        )}
+                        {booking.payment.method === 'Easypaisa/Jazzcash' && booking.payment.status === 'Pending' && (
+                           <button onClick={() => handleApprovePayment(booking._id)} className="bg-green-500 text-white px-3 py-1 rounded-lg text-sm">
+                            Approve
                           </button>
                         )}
                       </td>

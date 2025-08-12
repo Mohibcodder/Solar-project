@@ -1,3 +1,6 @@
+// -------------------------------------------------------------------
+// /models/Booking.js <- CORRECTED
+// -------------------------------------------------------------------
 import mongoose from 'mongoose';
 
 const BookingSchema = new mongoose.Schema({
@@ -10,7 +13,13 @@ const BookingSchema = new mongoose.Schema({
   trackingId: { type: String, unique: true, default: () => `SRV-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}` },
   images: { before: String, after: String },
   payment: {
-      method: { type: String, enum: ['Not Selected', 'Easypaisa', 'Jazzcash', 'Cash on Delivery'], default: 'Not Selected' },
+      // --- FIX START: "Easypaisa/Jazzcash" ko enum list mein add kiya gaya hai ---
+      method: { 
+          type: String, 
+          enum: ['Not Selected', 'Easypaisa', 'Jazzcash', 'Easypaisa/Jazzcash', 'Cash on Delivery'], 
+          default: 'Not Selected' 
+      },
+      // --- FIX END ---
       status: { type: String, enum: ['Pending', 'Paid'], default: 'Pending' },
       paymentId: String,
   }

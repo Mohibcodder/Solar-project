@@ -6,9 +6,9 @@ import bcrypt from 'bcryptjs';
 export async function POST(request) {
   await connectDB();
   try {
-    const { name, email, password, role } = await request.json();
+    const { name, email, phone, password, role } = await request.json(); // Get phone
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !password || !role || !phone) {
       return NextResponse.json({ message: 'Please fill all fields' }, { status: 400 });
     }
 
@@ -24,6 +24,9 @@ export async function POST(request) {
       email,
       password: hashedPassword,
       role,
+      profile: {
+          phone: phone // Save phone number in profile
+      }
     });
 
     await newUser.save();

@@ -1,6 +1,3 @@
-// -------------------------------------------------------------------
-// /app/customer/book-service/page.js <- UPDATED
-// -------------------------------------------------------------------
 "use client";
 import { useState } from 'react';
 import axios from 'axios';
@@ -11,14 +8,10 @@ export default function BookServicePage() {
     const [serviceType, setServiceType] = useState('Solar Panel Cleaning');
     const [address, setAddress] = useState('');
     const [bookingDate, setBookingDate] = useState('');
-    
-    // Modal states
     const [modalState, setModalState] = useState({ type: null, bookingId: null });
     const [transactionId, setTransactionId] = useState('');
-
     const router = useRouter();
 
-    // Step 1: Booking create karna
     const handleBookingSubmit = async (e) => {
         e.preventDefault();
         const loadingToast = toast.loading('Creating booking...');
@@ -29,19 +22,17 @@ export default function BookServicePage() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             toast.success('Booking created! Please select a payment method.', { id: loadingToast });
-            // Payment modal kholne ke liye state set karein
             setModalState({ type: 'select_method', bookingId: data.data._id });
         } catch (error) {
             toast.error(error.response?.data?.message || 'Booking failed', { id: loadingToast });
         }
     };
 
-    // Step 2: Jab user Easypaisa/Jazzcash select kare
     const openTransactionModal = () => {
         setModalState({ ...modalState, type: 'enter_tid' });
     };
 
-    // Step 3: Jab user TID enter karke confirm kare
+    // --- FIX START: Logic updated for Admin Approval ---
     const handleTidSubmit = async (e) => {
         e.preventDefault();
         if (!transactionId.trim()) {
@@ -49,29 +40,29 @@ export default function BookServicePage() {
             return;
         }
 
-        const loadingToast = toast.loading('Verifying payment...');
+        const loadingToast = toast.loading('Submitting for verification...');
         const token = localStorage.getItem('token');
         try {
-            // Database mein booking ko 'Paid' mark karein aur TID save karein
+            // Database mein booking ka status 'Pending' hi rahega, sirf TID save hogi
             await axios.put(`/api/bookings/${modalState.bookingId}`, 
                 { 
                     payment: { 
                         method: 'Easypaisa/Jazzcash', 
-                        status: 'Paid', 
-                        paymentId: transactionId 
+                        status: 'Pending', // Status Pending rahega
+                        paymentId: transactionId // TID save ho jayegi
                     } 
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            toast.success('Payment confirmed successfully!', { id: loadingToast });
-            setModalState({ type: null, bookingId: null }); // Saare modals band karein
+            toast.success('TID submitted! Admin will approve the payment shortly.', { id: loadingToast });
+            setModalState({ type: null, bookingId: null });
             router.push('/customer/dashboard');
         } catch (error) {
-            toast.error('Payment confirmation failed.', { id: loadingToast });
+            toast.error('Submission failed. Please try again.', { id: loadingToast });
         }
     };
+    // --- FIX END ---
     
-    // Cash on Delivery ke liye
      const handleCodSubmit = async () => {
         const loadingToast = toast.loading('Setting payment method...');
         const token = localStorage.getItem('token');
@@ -88,7 +79,6 @@ export default function BookServicePage() {
         }
     };
 
-
     return (
         <>
             <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -96,6 +86,7 @@ export default function BookServicePage() {
                 <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
                     <h2 className="text-2xl font-bold text-center mb-6">Schedule Your Service</h2>
                     <form onSubmit={handleBookingSubmit}>
+                        {/* Form fields... */}
                         <div className="mb-4">
                             <label className="block text-gray-700">Service Type</label>
                             <select value={serviceType} onChange={(e) => setServiceType(e.target.value)} className="w-full px-3 py-2 border rounded-lg">
@@ -119,12 +110,9 @@ export default function BookServicePage() {
                 </div>
             </div>
 
-            {/* Payment Modals */}
             {modalState.type && (
                 <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-                        
-                        {/* Pehla Modal: Payment Method Select Karein */}
                         {modalState.type === 'select_method' && (
                             <>
                                 <h3 className="text-2xl font-bold mb-6 text-center">Select Payment Method</h3>
@@ -138,8 +126,6 @@ export default function BookServicePage() {
                                 </div>
                             </>
                         )}
-
-                        {/* Doosra Modal: TID Enter Karein */}
                         {modalState.type === 'enter_tid' && (
                             <>
                                 <h3 className="text-2xl font-bold mb-4 text-center">Confirm Your Payment</h3>
@@ -159,12 +145,11 @@ export default function BookServicePage() {
                                         />
                                     </div>
                                     <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
-                                        Confirm Payment
+                                        Submit for Verification
                                     </button>
                                 </form>
                             </>
                         )}
-
                         <button onClick={() => setModalState({ type: null, bookingId: null })} className="mt-6 w-full text-center text-gray-600 hover:underline">Cancel</button>
                     </div>
                 </div>

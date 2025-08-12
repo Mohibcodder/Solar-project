@@ -1,6 +1,3 @@
-// -------------------------------------------------------------------
-// /app/api/bookings/route.js  <- CORRECTED
-// -------------------------------------------------------------------
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import jwt from 'jsonwebtoken';
@@ -8,14 +5,15 @@ import connectDB from '../../../utils/db';
 import Booking from '../../../models/Booking';
 import User from '../../../models/User';
 
-// Ensure this route is always dynamically rendered
+// FIX: Yeh line Next.js ko batati hai ke is route ko hamesha dynamically handle karein
 export const dynamic = 'force-dynamic';
 
-// GET method ke liye function
+// GET method
 export async function GET() {
   await connectDB();
   
-  const authorization = headers().get('authorization');
+ const reqHeaders = await headers();
+  const authorization = reqHeaders.get('authorization');
   let user = null;
 
   if (authorization && authorization.startsWith('Bearer ')) {
@@ -37,7 +35,7 @@ export async function GET() {
       bookings = await Booking.find({}).populate('customer').populate('technician');
     } else if (user.role === 'technician') {
       bookings = await Booking.find({ technician: user.userId }).populate('customer');
-    } else { // customer
+    } else {
       bookings = await Booking.find({ customer: user.userId }).populate('technician');
     }
     return NextResponse.json({ success: true, data: bookings });
@@ -46,11 +44,12 @@ export async function GET() {
   }
 }
 
-// POST method ke liye function
+// POST method
 export async function POST(request) {
   await connectDB();
 
-  const authorization = headers().get('authorization');
+  const reqHeaders = await headers();
+  const authorization = reqHeaders.get('authorization');
   let user = null;
   if (authorization && authorization.startsWith('Bearer ')) {
     const token = authorization.split(' ')[1];
@@ -65,24 +64,16 @@ export async function POST(request) {
     return NextResponse.json({ success: false, message: 'Not authorized' }, { status: 401 });
   }
 
-  // --- FIX START ---
-  // Admins should not be able to create bookings. Their role is to manage.
   if (user.role === 'admin') {
-    return NextResponse.json(
-      { success: false, message: 'Admin users cannot book services.' },
-      { status: 403 } // 403 Forbidden
-    );
+    return NextResponse.json({ success: false, message: 'Admin users cannot book services.' }, { status: 403 });
   }
-  // --- FIX END ---
 
   try {
     const body = await request.json();
-    // Because we blocked the admin, user.userId will now always be a valid ObjectId
     const bookingData = { ...body, customer: user.userId };
     const booking = await Booking.create(bookingData);
     return NextResponse.json({ success: true, data: booking }, { status: 201 });
   } catch (error) {
-    // The original BSONError will be caught here if something else goes wrong.
     return NextResponse.json({ success: false, message: error.message }, { status: 400 });
   }
 }

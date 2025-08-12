@@ -1,10 +1,13 @@
+// -------------------------------------------------------------------
+// /app/api/bookings/[id]/route.js <- CORRECTED
+// -------------------------------------------------------------------
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import connectDB from '../../../../utils/db';
 import Booking from '../../../../models/Booking';
 
-// FIX: Yeh line add karein taake route hamesha dynamically render ho
+// This line ensures the route is always rendered dynamically
 export const dynamic = 'force-dynamic';
 
 export async function PUT(request, { params }) {
@@ -41,11 +44,23 @@ export async function PUT(request, { params }) {
         return NextResponse.json({ success: false, message: 'Not authorized to update this booking' }, { status: 403 });
     }
 
-    // Jab admin technician assign kare, to status ko 'Assigned' set karein
+    // --- FIX START: Logic updated to preserve Transaction ID ---
+    // Agar admin payment approve kar raha hai, to sirf status update karein
+    if (isAdmin && body.payment?.status === 'Paid') {
+        const updatedBooking = await Booking.findByIdAndUpdate(
+            id, 
+            { $set: { 'payment.status': 'Paid' } }, // $set sirf di gayi field ko update karta hai
+            { new: true, runValidators: true }
+        );
+        return NextResponse.json({ success: true, data: updatedBooking });
+    }
+    // --- FIX END ---
+
+    // Baaki updates (jaise technician assign karna) ke liye
     if (isAdmin && body.technician) {
         body.status = 'Assigned';
     }
-
+    
     const updatedBooking = await Booking.findByIdAndUpdate(id, body, { new: true, runValidators: true });
     return NextResponse.json({ success: true, data: updatedBooking });
   } catch (error) {

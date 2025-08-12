@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Sun, ShieldCheck, Wrench } from 'lucide-react';
+import {  Sun, ShieldCheck, Wrench, Zap, Award, Smile, Star, ChevronDown, Facebook, Twitter, Instagram } from 'lucide-react';
 
 export default function HomePage() {
   return (
@@ -31,25 +31,90 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Services Section */}
-        <section className="py-20 bg-white">
+                <section id="services" className="py-20 bg-white">
           <div className="container mx-auto px-6 text-center">
-            <h3 className="text-3xl font-bold text-gray-800 mb-12">Our Comprehensive Solar Solutions</h3>
+            <h3 className="text-4xl font-bold text-gray-800 mb-2">Our Comprehensive Solar Solutions</h3>
+            <p className="text-gray-600 mb-16 max-w-2xl mx-auto">From pristine cleaning to robust maintenance, we provide everything you need to keep your solar array performing at its peak.</p>
             <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-gray-50 p-8 rounded-lg shadow-md">
-                <Sun className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                <h4 className="text-xl font-semibold mb-2">Solar Panel Cleaning</h4>
-                <p className="text-gray-600">Boost efficiency by up to 30% with our professional cleaning service.</p>
+              <div className="bg-gray-50 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <Sun className="h-16 w-16 text-blue-500 mx-auto mb-5" />
+                <h4 className="text-xl font-semibold mb-3">Solar Panel Cleaning</h4>
+                <p className="text-gray-600">Our eco-friendly cleaning process removes dirt, dust, and grime, boosting your panel's efficiency by up to 30%.</p>
               </div>
-              <div className="bg-gray-50 p-8 rounded-lg shadow-md">
+              <div className="bg-gray-50 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <ShieldCheck className="h-16 w-16 text-blue-500 mx-auto mb-5" />
+                <h4 className="text-xl font-semibold mb-3">Solar Panel Installation</h4>
+                <p className="text-gray-600">We provide seamless, expert installation of high-efficiency solar panels tailored specifically to your property and energy needs.</p>
+              </div>
+              <div className="bg-gray-50 p-8 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <Wrench className="h-16 w-16 text-blue-500 mx-auto mb-5" />
+                <h4 className="text-xl font-semibold mb-3">Maintenance & Repair</h4>
+                <p className="text-gray-600">Keep your system in optimal condition with our regular inspections, diagnostics, and prompt repair services.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* Why Choose Us Section --- NEW SECTION */}
+        <section id="why-us" className="py-20 bg-gray-50">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <h3 className="text-4xl font-bold text-gray-800 mb-2">Why Solar Revive?</h3>
+              <p className="text-gray-600 max-w-2xl mx-auto">We are more than just a service provider; we are your partners in clean energy.</p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+              <div className="p-6">
+                <Award className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+                <h4 className="text-xl font-semibold mb-2">Certified Experts</h4>
+                <p className="text-gray-600">Our technicians are fully trained, certified, and insured to handle your solar systems with utmost professionalism.</p>
+              </div>
+              <div className="p-6">
+                <Zap className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+                <h4 className="text-xl font-semibold mb-2">Maximum Efficiency</h4>
+                <p className="text-gray-600">We use the latest technology and techniques to ensure your panels operate at their highest possible efficiency.</p>
+              </div>
+              <div className="p-6">
+                <Smile className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+                <h4 className="text-xl font-semibold mb-2">Customer Satisfaction</h4>
+                <p className="text-gray-600">Your satisfaction is our priority. We guarantee a job well done and provide transparent communication throughout.</p>
+              </div>
+              <div className="p-6">
                 <ShieldCheck className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                <h4 className="text-xl font-semibold mb-2">Solar Panel Installation</h4>
-                <p className="text-gray-600">Expert installation of high-efficiency solar panels tailored to your needs.</p>
+                <h4 className="text-xl font-semibold mb-2">Safety First</h4>
+                <p className="text-gray-600">We adhere to strict safety protocols to protect your property and our team during every service visit.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials Section --- NEW SECTION */}
+        <section id="testimonials" className="py-20 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <h3 className="text-4xl font-bold text-gray-800 mb-2">What Our Customers Say</h3>
+              <p className="text-gray-600 max-w-2xl mx-auto">We're proud to have earned the trust of homeowners and businesses across the region.</p>
+            </div>
+            <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="bg-gray-50 p-8 rounded-lg shadow-md">
+                <div className="flex text-yellow-500 mb-4">
+                  <Star /><Star /><Star /><Star /><Star />
+                </div>
+                <p className="text-gray-600 mb-6 italic">"After Solar Revive cleaned our panels, we saw an immediate 25% increase in our energy production. Incredible service and very professional team!"</p>
+                <p className="font-bold text-gray-800">- Aisha K., Paris</p>
               </div>
               <div className="bg-gray-50 p-8 rounded-lg shadow-md">
-                <Wrench className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                <h4 className="text-xl font-semibold mb-2">Solar Panel Maintenance</h4>
-                <p className="text-gray-600">Regular inspections and repairs to keep your system running smoothly.</p>
+                <div className="flex text-yellow-500 mb-4">
+                  <Star /><Star /><Star /><Star /><Star />
+                </div>
+                <p className="text-gray-600 mb-6 italic">"The installation process was smooth and hassle-free. The team explained everything clearly and were very respectful of our property. Highly recommended."</p>
+                <p className="font-bold text-gray-800">- Marc D., Lyon</p>
+              </div>
+              <div className="bg-gray-50 p-8 rounded-lg shadow-md">
+                <div className="flex text-yellow-500 mb-4">
+                  <Star /><Star /><Star /><Star /><Star />
+                </div>
+                <p className="text-gray-600 mb-6 italic">"We signed up for the annual maintenance plan. It gives us great peace of mind knowing our investment is being looked after by experts."</p>
+                <p className="font-bold text-gray-800">- Sophie L., Marseille</p>
               </div>
             </div>
           </div>

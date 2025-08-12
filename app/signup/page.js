@@ -1,7 +1,6 @@
-'use client'
+"use client";
 import { useState } from 'react';
 import axios from 'axios';
-// import { useRouter } from 'next/router';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
@@ -10,9 +9,10 @@ export default function SignupPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '', // Added phone state
     password: '',
     confirmPassword: '',
-    role: 'customer', // Default role
+    role: 'customer',
   });
   const router = useRouter();
 
@@ -31,12 +31,13 @@ export default function SignupPage() {
       await axios.post('/api/auth/signup', {
         name: formData.name,
         email: formData.email,
+        phone: formData.phone, // Send phone number to API
         password: formData.password,
         role: formData.role,
       });
       toast.success('Account created successfully! Please login.', { id: loadingToast });
       router.push('/login');
-    } catch (error) {
+    } catch (error)      {
       toast.error(error.response?.data?.message || 'Signup failed', { id: loadingToast });
     }
   };
@@ -54,6 +55,11 @@ export default function SignupPage() {
           <div className="mb-4">
             <label className="block text-gray-700">Email</label>
             <input type="email" name="email" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg" required />
+          </div>
+          {/* Phone Number Field */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Phone Number</label>
+            <input type="tel" name="phone" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg" required />
           </div>
           <div className="mb-4">
             <label className="block text-gray-700">Password</label>
