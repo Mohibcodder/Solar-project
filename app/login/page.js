@@ -1,8 +1,6 @@
-'use client'
+"use client";
 import { useState } from 'react';
-
 import axios from 'axios';
-// import { useRouter } from 'next/router';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast, { Toaster } from 'react-hot-toast';
@@ -21,7 +19,6 @@ export default function LoginPage() {
       localStorage.setItem('user', JSON.stringify(data.user));
       toast.success('Login successful!', { id: loadingToast });
       
-      // Redirect based on role
       switch (data.user.role) {
         case 'admin':
           router.push('/admin/dashboard');
@@ -70,7 +67,7 @@ export default function LoginPage() {
           </button>
         </form>
         <p className="text-center mt-4">
-          Don't have an account? <Link href="/signup" className="text-blue-500">Sign Up</Link>
+          Don&apos;t have an account? <Link href="/signup" className="text-blue-500">Sign Up</Link>
         </p>
       </div>
     </div>

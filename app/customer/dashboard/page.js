@@ -42,16 +42,12 @@ export default function CustomerDashboard() {
     fetchBookings();
   }, [router]);
   
-  // --- FIX START ---
   const handleLogout = () => {
-    // Clear user data from browser storage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     toast.success('Logged out successfully!');
-    // Redirect to login page
     router.push('/login');
   };
-  // --- FIX END ---
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -111,7 +107,7 @@ export default function CustomerDashboard() {
                 <div className="bg-white p-8 rounded-lg shadow-2xl max-w-lg w-full">
                     <h3 className="text-2xl font-bold mb-4 flex items-center"><Bot className="mr-2"/> How to Book a Service</h3>
                     <ol className="list-decimal list-inside space-y-2 text-gray-700">
-                        <li>Click the "Book Now" button on your dashboard.</li>
+                        <li>Click the &quot;Book Now&quot; button on your dashboard.</li>
                         <li>Fill in the service details: choose a service type, enter your address, and select a convenient date and time.</li>
                         <li>Review your booking details and proceed to payment.</li>
                         <li>Once payment is successful, your booking is confirmed! You will receive a tracking ID.</li>

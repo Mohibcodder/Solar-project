@@ -60,14 +60,12 @@ export default function TechnicianDashboard() {
       toast('This feature is for demonstration. Image upload would be implemented here.');
   }
 
-  // --- FIX START ---
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     toast.success('Logged out successfully!');
     router.push('/login');
   };
-  // --- FIX END ---
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -125,11 +123,11 @@ export default function TechnicianDashboard() {
                     <p className="ml-4 text-gray-500">Google Map for customer location would be here.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                    <button onClick={() => handleImageUpload(selectedJob._id, 'before')} className="w-full flex items-center justify-center bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400"><Camera className="mr-2"/>Upload 'Before' Picture</button>
-                    <button onClick={() => handleImageUpload(selectedJob._id, 'after')} className="w-full flex items-center justify-center bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400"><Camera className="mr-2"/>Upload 'After' Picture</button>
+                    <button onClick={() => handleImageUpload(selectedJob._id, 'before')} className="w-full flex items-center justify-center bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400"><Camera className="mr-2"/>Upload &apos;Before&apos; Picture</button>
+                    <button onClick={() => handleImageUpload(selectedJob._id, 'after')} className="w-full flex items-center justify-center bg-gray-300 text-gray-800 py-2 rounded-lg hover:bg-gray-400"><Camera className="mr-2"/>Upload &apos;After&apos; Picture</button>
                 </div>
                  <div className="flex items-center gap-4">
-                    {selectedJob.status === 'Confirmed' && <button onClick={() => handleUpdateStatus(selectedJob._id, 'In Progress')} className="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Start Job</button>}
+                    {selectedJob.status === 'Assigned' && <button onClick={() => handleUpdateStatus(selectedJob._id, 'In Progress')} className="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Start Job</button>}
                     {selectedJob.status === 'In Progress' && <button onClick={() => handleUpdateStatus(selectedJob._id, 'Completed')} className="text-sm bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Mark as Completed</button>}
                 </div>
                 <button onClick={() => setSelectedJob(null)} className="mt-6 w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">
