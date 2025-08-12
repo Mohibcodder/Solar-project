@@ -1,5 +1,7 @@
 "use client";
 
+import Link from 'next/link';
+
 import { Sun, ShieldCheck, Wrench, Zap, Award, Smile, Star, ChevronDown, Facebook, Twitter, Instagram } from 'lucide-react';
 
 export default function HomePage() {
@@ -9,17 +11,17 @@ export default function HomePage() {
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">
-            <a href="/" className="flex items-center hover:opacity-80 transition-opacity">
+            <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
               <Sun className="inline-block text-yellow-500 mr-2 h-7 w-7" />
               Solar Revive
-            </a>
+            </Link>
           </h1>
           <nav className="hidden md:flex items-center space-x-6">
-            <a href="#services" className="text-gray-600 hover:text-blue-500">Services</a>
-            <a href="#why-us" className="text-gray-600 hover:text-blue-500">Why Us</a>
-            <a href="#faq" className="text-gray-600 hover:text-blue-500">FAQ</a>
-            <a href="/login" className="text-gray-600 hover:text-blue-500 px-4">Login</a>
-            <a href="/signup" className="bg-blue-500 text-white rounded-md px-4 py-2 hover:bg-blue-600 transition-colors">Sign Up</a>
+            <Link href="#services" className="text-gray-600 hover:text-blue-500">Services</Link>
+            <Link href="#why-us" className="text-gray-600 hover:text-blue-500">Why Us</Link>
+            <Link href="#faq" className="text-gray-600 hover:text-blue-500">FAQ</Link>
+            <Link href="/login" className="text-gray-600 hover:text-blue-500 px-4">Login</Link>
+            <Link href="/signup" className="bg-blue-500 text-white rounded-md px-4 py-2 hover:bg-blue-600 transition-colors">Sign Up</Link>
           </nav>
         </div>
       </header>
@@ -31,9 +33,9 @@ export default function HomePage() {
           <div className="relative container mx-auto text-center z-10">
             <h2 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">Revitalize Your Solar Investment</h2>
             <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto">Expert cleaning, installation, and maintenance services designed to maximize your energy output and protect your investment for years to come.</p>
-            <a href="#contact" className="bg-blue-500 text-white font-bold rounded-full py-4 px-10 text-lg hover:bg-blue-600 transition duration-300 transform hover:scale-105 inline-block">
+            <Link href="#contact" className="bg-blue-500 text-white font-bold rounded-full py-4 px-10 text-lg hover:bg-blue-600 transition duration-300 transform hover:scale-105 inline-block">
               Book a Service Today
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -178,10 +180,10 @@ export default function HomePage() {
             <div>
               <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
-                <li><a href="#services" className="text-gray-400 hover:text-white">Services</a></li>
-                <li><a href="#why-us" className="text-gray-400 hover:text-white">Why Us</a></li>
-                <li><a href="#testimonials" className="text-gray-400 hover:text-white">Testimonials</a></li>
-                <li><a href="#faq" className="text-gray-400 hover:text-white">FAQ</a></li>
+                <li><Link href="#services" className="text-gray-400 hover:text-white">Services</Link></li>
+                <li><Link href="#why-us" className="text-gray-400 hover:text-white">Why Us</Link></li>
+                <li><Link href="#testimonials" className="text-gray-400 hover:text-white">Testimonials</Link></li>
+                <li><Link href="#faq" className="text-gray-400 hover:text-white">FAQ</Link></li>
               </ul>
             </div>
             <div>
@@ -195,11 +197,7 @@ export default function HomePage() {
             </div>
             <div>
                 <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
-                <div className="flex space-x-4">
-                    <a href="#" className="text-gray-400 hover:text-white"><Facebook /></a>
-                    <a href="#" className="text-gray-400 hover:text-white"><Twitter /></a>
-                    <a href="#" className="text-gray-400 hover:text-white"><Instagram /></a>
-                </div>
+            
             </div>
           </div>
         </div>
