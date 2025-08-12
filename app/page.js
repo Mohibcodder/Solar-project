@@ -33,7 +33,7 @@ export default function HomePage() {
           <div className="relative container mx-auto text-center z-10">
             <h2 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">Revitalize Your Solar Investment</h2>
             <p className="text-lg md:text-xl mb-8 max-w-3xl mx-auto">Expert cleaning, installation, and maintenance services designed to maximize your energy output and protect your investment for years to come.</p>
-            <Link href="#contact" className="bg-blue-500 text-white font-bold rounded-full py-4 px-10 text-lg hover:bg-blue-600 transition duration-300 transform hover:scale-105 inline-block">
+            <Link href="/login" className="bg-blue-500 text-white font-bold rounded-full py-4 px-10 text-lg hover:bg-blue-600 transition duration-300 transform hover:scale-105 inline-block">
               Book a Service Today
             </Link>
           </div>
