@@ -7,9 +7,8 @@ const UserSchema = new mongoose.Schema({
   role: { type: String, enum: ['customer', 'technician', 'admin'], required: true },
   profile: {
       phone: { type: String }, // Phone field added
+       expertise: { type: String, enum: ['Solar Panel Cleaning', 'Solar Panel Installation', 'Solar Foundation', 'Not Applicable'], default: 'Not Applicable' },
       address: String,
-      expertise: String,
-      profilePicture: String,
   }
 }, { timestamps: true });
 

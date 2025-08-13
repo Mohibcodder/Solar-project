@@ -29,6 +29,7 @@ export default function CustomersPage() {
                             <th className="p-3">Name</th>
                             <th className="p-3">Email</th>
                             <th className="p-3">Phone</th>
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -37,6 +38,7 @@ export default function CustomersPage() {
                                 <td className="p-3">{user.name}</td>
                                 <td className="p-3">{user.email}</td>
                                 <td className="p-3">{user.profile?.phone || 'N/A'}</td>
+                              
                             </tr>
                         ))}
                     </tbody>

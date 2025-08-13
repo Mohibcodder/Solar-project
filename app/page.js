@@ -21,7 +21,53 @@ const FaqItem = ({ question, children }) => {
     </div>
   );
 };
+const AnimatedCounter = ({ end, duration = 2000 }) => {
+    const [count, setCount] = useState(0);
+    const ref = useRef(null);
+    const isInView = useIsInView(ref);
 
+    useEffect(() => {
+        if (isInView) {
+            let start = 0;
+            const endValue = parseInt(end);
+            if (start === endValue) return;
+
+            let startTime = null;
+            const animate = (timestamp) => {
+                if (!startTime) startTime = timestamp;
+                const progress = timestamp - startTime;
+                const increment = Math.min(Math.floor(progress / duration * endValue), endValue);
+                setCount(increment);
+                if (progress < duration) {
+                    requestAnimationFrame(animate);
+                }
+            };
+            requestAnimationFrame(animate);
+        }
+    }, [isInView, end, duration]);
+
+    return <span ref={ref}>{count}</span>;
+};
+
+// Helper hook to detect when an element is in view
+const useIsInView = (ref) => {
+    const [isIntersecting, setIsIntersecting] = useState(false);
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => setIsIntersecting(entry.isIntersecting),
+            { threshold: 0.1 }
+        );
+        if (ref.current) {
+            observer.observe(ref.current);
+        }
+        return () => {
+            if (ref.current) {
+                observer.unobserve(ref.current);
+            }
+        };
+    }, [ref]);
+    return isIntersecting;
+};
 // --- UPDATED CHATBOT COMPONENT ---
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -238,7 +284,36 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+
+        <section id="impact" className="py-24 bg-white">
+            <div className="container mx-auto px-6 text-center">
+                <h3 className="text-4xl font-bold text-slate-800 mb-16 fade-in">Our Impact</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="text-center fade-in" style={{ animationDelay: '0.2s' }}>
+                        <h4 className="text-6xl font-bold text-indigo-600">
+                            <AnimatedCounter end={320} />+
+                        </h4>
+                        <p className="text-slate-500 mt-2 text-lg">Projects Completed</p>
+                    </div>
+                    <div className="text-center fade-in" style={{ animationDelay: '0.4s' }}>
+                        <h4 className="text-6xl font-bold text-indigo-600">
+                            <AnimatedCounter end={98} />
+                        </h4>
+                        <p className="text-slate-500 mt-2 text-lg">Technicians</p>
+                    </div>
+                    <div className="text-center fade-in" style={{ animationDelay: '0.6s' }}>
+                        <h4 className="text-6xl font-bold text-indigo-600">
+                            <AnimatedCounter end={45} />
+                        </h4>
+                        <p className="text-slate-500 mt-2 text-lg">Partners Nationwide</p>
+                    </div>
+                </div>
+            </div>
+        </section>
       </main>
+
+
 
       <footer className="bg-slate-800 text-white">
         <div className="container mx-auto px-6 py-16">
@@ -261,10 +336,9 @@ export default function HomePage() {
             <div>
               <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
               <ul className="space-y-2 text-slate-400">
-                <li>123 Solar Avenue,</li>
-                <li>75001 Paris, France</li>
-                <li>contact@solarrevive.fr</li>
-                <li>+33 1 23 45 67 89</li>
+                <li>Johar Town Lahore</li>
+                <li>SolarRevive@gmail.com</li>
+                <li>+92 3111155500</li>
               </ul>
             </div>
             <div>

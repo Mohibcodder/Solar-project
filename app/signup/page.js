@@ -9,15 +9,17 @@ export default function SignupPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '', // Added phone state
+    phone: '',
     password: '',
     confirmPassword: '',
     role: 'customer',
+    expertise: '', 
   });
   const router = useRouter();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -26,15 +28,14 @@ export default function SignupPage() {
       toast.error("Passwords do not match!");
       return;
     }
+    if (formData.role === 'technician' && !formData.expertise) {
+        toast.error("Please select your expertise.");
+        return;
+    }
     const loadingToast = toast.loading('Creating account...');
     try {
-      await axios.post('/api/auth/signup', {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone, // Send phone number to API
-        password: formData.password,
-        role: formData.role,
-      });
+      // hasSubscription has been removed from here
+      await axios.post('/api/auth/signup', formData);
       toast.success('Account created successfully! Please login.', { id: loadingToast });
       router.push('/login');
     } catch (error)      {
@@ -47,35 +48,47 @@ export default function SignupPage() {
       <Toaster />
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6">Create Your Account</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
             <label className="block text-gray-700">Full Name</label>
             <input type="text" name="name" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg" required />
           </div>
-          <div className="mb-4">
+          <div>
             <label className="block text-gray-700">Email</label>
             <input type="email" name="email" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg" required />
           </div>
-          {/* Phone Number Field */}
-          <div className="mb-4">
+          <div>
             <label className="block text-gray-700">Phone Number</label>
             <input type="tel" name="phone" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg" required />
           </div>
-          <div className="mb-4">
+          <div>
             <label className="block text-gray-700">Password</label>
             <input type="password" name="password" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg" required />
           </div>
-          <div className="mb-6">
+          <div>
             <label className="block text-gray-700">Confirm Password</label>
             <input type="password" name="confirmPassword" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg" required />
           </div>
-           <div className="mb-6">
+          <div>
             <label className="block text-gray-700">I am a:</label>
             <select name="role" onChange={handleChange} value={formData.role} className="w-full px-3 py-2 border rounded-lg">
                 <option value="customer">Customer</option>
                 <option value="technician">Technician</option>
             </select>
-           </div>
+          </div>
+
+          {formData.role === 'technician' && (
+            <div className="transition-all duration-300">
+              <label className="block text-gray-700">Select Expertise:</label>
+              <select name="expertise" onChange={handleChange} value={formData.expertise} className="w-full px-3 py-2 border rounded-lg" required>
+                  <option value="" disabled>Choose a category</option>
+                  <option value="Solar Panel Cleaning">Solar Panel Cleaning</option>
+                  <option value="Solar Panel Installation">Solar Panel Installation</option>
+                  <option value="Solar Foundation">Solar Foundation</option>
+              </select>
+            </div>
+          )}
+          
           <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
             Sign Up
           </button>

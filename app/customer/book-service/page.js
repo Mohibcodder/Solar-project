@@ -8,8 +8,12 @@ export default function BookServicePage() {
     const [serviceType, setServiceType] = useState('Solar Panel Cleaning');
     const [address, setAddress] = useState('');
     const [bookingDate, setBookingDate] = useState('');
+    const [wantsSubscription, setWantsSubscription] = useState(false);
+    
+    // States for payment modal
     const [modalState, setModalState] = useState({ type: null, bookingId: null });
     const [transactionId, setTransactionId] = useState('');
+
     const router = useRouter();
 
     const handleBookingSubmit = async (e) => {
@@ -18,10 +22,16 @@ export default function BookServicePage() {
         const token = localStorage.getItem('token');
         try {
             const { data } = await axios.post('/api/bookings', 
-                { serviceType, address, bookingDate },
+                { 
+                    serviceType, 
+                    address, 
+                    bookingDate,
+                    wantsSubscription 
+                },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             toast.success('Booking created! Please select a payment method.', { id: loadingToast });
+            // Open the payment method selection modal
             setModalState({ type: 'select_method', bookingId: data.data._id });
         } catch (error) {
             toast.error(error.response?.data?.message || 'Booking failed', { id: loadingToast });
@@ -32,24 +42,21 @@ export default function BookServicePage() {
         setModalState({ ...modalState, type: 'enter_tid' });
     };
 
-    // --- FIX START: Logic updated for Admin Approval ---
     const handleTidSubmit = async (e) => {
         e.preventDefault();
         if (!transactionId.trim()) {
             toast.error("Please enter a valid Transaction ID.");
             return;
         }
-
         const loadingToast = toast.loading('Submitting for verification...');
         const token = localStorage.getItem('token');
         try {
-            // Database mein booking ka status 'Pending' hi rahega, sirf TID save hogi
             await axios.put(`/api/bookings/${modalState.bookingId}`, 
                 { 
                     payment: { 
                         method: 'Easypaisa/Jazzcash', 
-                        status: 'Pending', // Status Pending rahega
-                        paymentId: transactionId // TID save ho jayegi
+                        status: 'Pending',
+                        paymentId: transactionId
                     } 
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -61,9 +68,8 @@ export default function BookServicePage() {
             toast.error('Submission failed. Please try again.', { id: loadingToast });
         }
     };
-    // --- FIX END ---
     
-     const handleCodSubmit = async () => {
+    const handleCodSubmit = async () => {
         const loadingToast = toast.loading('Setting payment method...');
         const token = localStorage.getItem('token');
         try {
@@ -85,23 +91,45 @@ export default function BookServicePage() {
                 <Toaster />
                 <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
                     <h2 className="text-2xl font-bold text-center mb-6">Schedule Your Service</h2>
-                    <form onSubmit={handleBookingSubmit}>
-                        {/* Form fields... */}
-                        <div className="mb-4">
+                    <form onSubmit={handleBookingSubmit} className="space-y-4">
+                        <div>
                             <label className="block text-gray-700">Service Type</label>
                             <select value={serviceType} onChange={(e) => setServiceType(e.target.value)} className="w-full px-3 py-2 border rounded-lg">
                                 <option>Solar Panel Cleaning</option>
                                 <option>Solar Panel Installation</option>
-                                <option>Solar Panel Maintenance</option>
+                                <option>Solar Foundation</option>
                             </select>
                         </div>
-                        <div className="mb-4">
+                         <div className="mb-4 p-4 bg-slate-50 rounded-lg text-slate-600">
+                            <h4 className="font-semibold text-slate-800">Transparent Pricing</h4>
+                            <ul className="list-disc list-inside mt-2 text-sm">
+                                <li>Standard Cleaning: 1500</li>
+                                <li>Solar Installation: 2500</li>
+                                <li>Solar Foundation: 2000</li>
+
+                                <li>Annual Subscription: 12000</li>
+                            </ul>
+                        </div>
+                        <div>
                             <label className="block text-gray-700">Full Address</label>
                             <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full px-3 py-2 border rounded-lg" required />
                         </div>
-                        <div className="mb-4">
+                        <div>
                             <label className="block text-gray-700">Date & Time</label>
                             <input type="datetime-local" value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} className="w-full px-3 py-2 border rounded-lg" required />
+                        </div>
+                        <div className="flex items-center p-4 bg-slate-50 rounded-lg">
+                            <input 
+                                type="checkbox" 
+                                id="subscription" 
+                                checked={wantsSubscription} 
+                                onChange={(e) => setWantsSubscription(e.target.checked)} 
+                                className="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" 
+                            />
+                            <label htmlFor="subscription" className="ml-3 block text-sm text-gray-900">
+                                <span className="font-semibold">Sign up for Annual Subscription ($200/year)</span>
+                                <span className="block text-xs text-gray-500">Get priority service and exclusive discounts!</span>
+                            </label>
                         </div>
                         <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
                             Proceed to Payment
@@ -110,6 +138,7 @@ export default function BookServicePage() {
                 </div>
             </div>
 
+            {/* Payment Modals */}
             {modalState.type && (
                 <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
                     <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">

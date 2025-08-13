@@ -29,6 +29,7 @@ export default function TechniciansPage() {
                             <th className="p-3">Name</th>
                             <th className="p-3">Email</th>
                             <th className="p-3">Phone</th>
+                            <th className="p-3">Expertise</th> {/* New Column */}
                         </tr>
                     </thead>
                     <tbody>
@@ -37,6 +38,7 @@ export default function TechniciansPage() {
                                 <td className="p-3">{user.name}</td>
                                 <td className="p-3">{user.email}</td>
                                 <td className="p-3">{user.profile?.phone || 'N/A'}</td>
+                                <td className="p-3">{user.profile?.expertise || 'N/A'}</td>
                             </tr>
                         ))}
                     </tbody>
