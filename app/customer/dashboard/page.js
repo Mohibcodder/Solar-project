@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Book, ArrowRight, PlusCircle } from 'lucide-react';
+import { Book, ArrowRight, PlusCircle, Calculator } from 'lucide-react';
 
 export default function CustomerDashboard() {
   const [user, setUser] = useState(null);
@@ -36,7 +36,7 @@ export default function CustomerDashboard() {
             toast.error("Could not fetch bookings.");
         }
     };
-    fetchBookings();
+    if(token) fetchBookings();
   }, [router]);
   
   const getStatusChip = (status) => {
@@ -56,17 +56,31 @@ export default function CustomerDashboard() {
             <p className="text-slate-500 mt-1">Here&apos;s an overview of your services.</p>
         </div>
         
-        <div className="bg-indigo-600 text-white p-8 rounded-xl shadow-lg mb-8 flex flex-col md:flex-row justify-between items-center fade-in" style={{ animationDelay: '0.2s' }}>
-            <div>
-                <h3 className="text-2xl font-bold mb-2">Ready for a Service?</h3>
-                <p className="text-indigo-200">Keep your solar panels in peak condition.</p>
+        {/* Grid for Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Book Service Card */}
+            <div className="bg-indigo-600 text-white p-8 rounded-xl shadow-lg flex flex-col justify-between fade-in" style={{ animationDelay: '0.2s' }}>
+                <div>
+                    <h3 className="text-2xl font-bold mb-2">Ready for a Service?</h3>
+                    <p className="text-indigo-200">Keep your solar panels in peak condition.</p>
+                </div>
+                <button onClick={() => router.push('/customer/book-service')} className="bg-white text-indigo-600 font-bold py-3 px-6 rounded-lg mt-4 hover:bg-slate-100 transition-all transform hover:scale-105 flex items-center shadow-md self-start">
+                    Book a New Service <PlusCircle className="ml-2 h-5 w-5"/>
+                </button>
             </div>
-            <button onClick={() => router.push('/customer/book-service')} className="bg-white text-indigo-600 font-bold py-3 px-6 rounded-lg mt-4 md:mt-0 hover:bg-slate-100 transition-all transform hover:scale-105 flex items-center shadow-md">
-                Book a New Service <PlusCircle className="ml-2 h-5 w-5"/>
-            </button>
+            {/* Estimator Card */}
+            <div className="bg-amber-500 text-slate-900 p-8 rounded-xl shadow-lg flex flex-col justify-between fade-in" style={{ animationDelay: '0.4s' }}>
+                <div>
+                    <h3 className="text-2xl font-bold mb-2">Plan Your System</h3>
+                    <p className="text-amber-900">Estimate the solar system size you need based on your energy consumption.</p>
+                </div>
+                <button onClick={() => router.push('/customer/calculator')} className="bg-white text-amber-900 font-bold py-3 px-6 rounded-lg mt-4 hover:bg-slate-100 transition-all transform hover:scale-105 flex items-center shadow-md self-start">
+                    Open Estimator <Calculator className="ml-2 h-5 w-5"/>
+                </button>
+            </div>
         </div>
 
-        <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg fade-in" style={{ animationDelay: '0.4s' }}>
+        <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg fade-in" style={{ animationDelay: '0.6s' }}>
           <h3 className="text-2xl font-bold text-slate-800 mb-6">My Bookings</h3>
           <div className="space-y-4">
             {bookings.length > 0 ? bookings.map(booking => (

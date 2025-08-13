@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, User, LogOut, Sun, Menu, X } from 'lucide-react';
+import { LayoutDashboard, User, LogOut, Sun, Menu, X, Calculator } from 'lucide-react'; // Calculator icon added
 import { Toaster } from 'react-hot-toast';
 
 export default function CustomerLayout({ children }) {
@@ -17,6 +17,7 @@ export default function CustomerLayout({ children }) {
 
     const navLinks = [
         { href: '/customer/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { href: '/customer/calculator', label: 'Estimator', icon: Calculator }, // New Link
         { href: '/customer/profile', label: 'Profile', icon: User },
     ];
 
