@@ -2,42 +2,91 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
-import { Book, ArrowRight, PlusCircle, Calculator } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
+import { Book, Star, PlusCircle, Calculator } from 'lucide-react';
+
+// Rating Modal Component
+const RatingModal = ({ booking, onClose, onRatingSubmit }) => {
+    const [rating, setRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+
+    const handleSubmit = () => {
+        if (rating === 0) {
+            toast.error("Please select a rating.");
+            return;
+        }
+        onRatingSubmit(booking._id, rating);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm text-center">
+                <h3 className="text-2xl font-bold mb-2 text-slate-800">Rate Your Service</h3>
+                <p className="text-slate-500 mb-6">How was your experience with the technician?</p>
+                <div className="flex justify-center items-center gap-2 mb-6">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                            key={star}
+                            className={`h-10 w-10 cursor-pointer transition-colors ${ (hoverRating || rating) >= star ? 'text-amber-400' : 'text-slate-300'}`}
+                            fill="currentColor"
+                            onClick={() => setRating(star)}
+                            onMouseEnter={() => setHoverRating(star)}
+                            onMouseLeave={() => setHoverRating(0)}
+                        />
+                    ))}
+                </div>
+                <div className="flex gap-4">
+                    <button onClick={onClose} className="w-full bg-slate-100 text-slate-700 py-2.5 rounded-lg hover:bg-slate-200 font-semibold">
+                        Cancel
+                    </button>
+                    <button onClick={handleSubmit} className="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-semibold">
+                        Submit Rating
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default function CustomerDashboard() {
   const [user, setUser] = useState(null);
   const [bookings, setBookings] = useState([]);
+  const [selectedBookingForRating, setSelectedBookingForRating] = useState(null);
   const router = useRouter();
 
-  useEffect(() => {
-    // Animation observer
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('animate-fade-in-up');
-      });
-    }, { threshold: 0.1 });
-    setTimeout(() => {
-        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-    }, 100);
+  const fetchBookings = async () => {
+    const token = localStorage.getItem('token');
+    try {
+        const { data } = await axios.get('/api/bookings', { headers: { Authorization: `Bearer ${token}` }});
+        setBookings(data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+    } catch (error) {
+        toast.error("Could not fetch bookings.");
+    }
+  };
 
+  useEffect(() => {
     const userDataString = localStorage.getItem('user');
     if (userDataString) {
         const userData = JSON.parse(userDataString);
         setUser(userData);
+    } else {
+        router.push('/login');
     }
-
-    const token = localStorage.getItem('token');
-    const fetchBookings = async () => {
-        try {
-            const { data } = await axios.get('/api/bookings', { headers: { Authorization: `Bearer ${token}` }});
-            setBookings(data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-        } catch (error) {
-            toast.error("Could not fetch bookings.");
-        }
-    };
-    if(token) fetchBookings();
+    fetchBookings();
   }, [router]);
+
+  const handleRatingSubmit = async (bookingId, rating) => {
+    const token = localStorage.getItem('token');
+    const loadingToast = toast.loading("Submitting rating...");
+    try {
+        await axios.put(`/api/bookings/${bookingId}`, { rating }, { headers: { Authorization: `Bearer ${token}` }});
+        toast.success("Thank you for your feedback!", { id: loadingToast });
+        setSelectedBookingForRating(null);
+        fetchBookings(); // Refresh bookings to show the new rating
+    } catch (error) {
+        toast.error(error.response?.data?.message || "Failed to submit rating.", { id: loadingToast });
+    }
+  };
   
   const getStatusChip = (status) => {
       switch (status) {
@@ -51,15 +100,14 @@ export default function CustomerDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto">
-        <div className="mb-8 fade-in">
+        <Toaster position="top-right" />
+        <div className="mb-8">
             <h2 className="text-3xl font-bold text-slate-800">Welcome back, {user?.name}!</h2>
             <p className="text-slate-500 mt-1">Here&apos;s an overview of your services.</p>
         </div>
         
-        {/* Grid for Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            {/* Book Service Card */}
-            <div className="bg-indigo-600 text-white p-8 rounded-xl shadow-lg flex flex-col justify-between fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="bg-indigo-600 text-white p-8 rounded-xl shadow-lg flex flex-col justify-between">
                 <div>
                     <h3 className="text-2xl font-bold mb-2">Ready for a Service?</h3>
                     <p className="text-indigo-200">Keep your solar panels in peak condition.</p>
@@ -68,11 +116,10 @@ export default function CustomerDashboard() {
                     Book a New Service <PlusCircle className="ml-2 h-5 w-5"/>
                 </button>
             </div>
-            {/* Estimator Card */}
-            <div className="bg-amber-500 text-slate-900 p-8 rounded-xl shadow-lg flex flex-col justify-between fade-in" style={{ animationDelay: '0.4s' }}>
+            <div className="bg-amber-500 text-slate-900 p-8 rounded-xl shadow-lg flex flex-col justify-between">
                 <div>
                     <h3 className="text-2xl font-bold mb-2">Plan Your System</h3>
-                    <p className="text-amber-900">Estimate the solar system size you need based on your energy consumption.</p>
+                    <p className="text-amber-900">Estimate the solar system size you need.</p>
                 </div>
                 <button onClick={() => router.push('/customer/calculator')} className="bg-white text-amber-900 font-bold py-3 px-6 rounded-lg mt-4 hover:bg-slate-100 transition-all transform hover:scale-105 flex items-center shadow-md self-start">
                     Open Estimator <Calculator className="ml-2 h-5 w-5"/>
@@ -80,7 +127,7 @@ export default function CustomerDashboard() {
             </div>
         </div>
 
-        <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg fade-in" style={{ animationDelay: '0.6s' }}>
+        <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
           <h3 className="text-2xl font-bold text-slate-800 mb-6">My Bookings</h3>
           <div className="space-y-4">
             {bookings.length > 0 ? bookings.map(booking => (
@@ -92,14 +139,31 @@ export default function CustomerDashboard() {
                 </div>
                 <div className="flex items-center gap-4 w-full sm:w-auto">
                     <span className={`px-4 py-1 text-sm font-semibold rounded-full ${getStatusChip(booking.status)}`}>{booking.status}</span>
-                    <button className="text-indigo-600 hover:text-indigo-800 hidden sm:block"><ArrowRight className="h-5 w-5"/></button>
+                    
+                    {/* Rating Display/Button */}
+                    {booking.status === 'Completed' && (
+                        booking.rating ? (
+                            <div className="flex items-center gap-1 text-amber-500">
+                                {[...Array(booking.rating)].map((_, i) => <Star key={i} size={18} fill="currentColor"/>)}
+                                {[...Array(5 - booking.rating)].map((_, i) => <Star key={i} size={18} className="text-slate-300"/>)}
+                            </div>
+                        ) : (
+                            <button onClick={() => setSelectedBookingForRating(booking)} className="bg-amber-400 text-white text-xs font-bold py-1 px-3 rounded-full hover:bg-amber-500 transition-colors">
+                                Rate Service
+                            </button>
+                        )
+                    )}
                 </div>
               </div>
             )) : 
-            <div className="text-center py-10"><Book className="mx-auto h-12 w-12 text-slate-300" /><p className="mt-4 text-slate-500">You have no upcoming services.</p></div>
+            <div className="text-center py-10">
+                <Book className="mx-auto h-12 w-12 text-slate-300" />
+                <p className="mt-4 text-slate-500">You have no upcoming services.</p>
+            </div>
             }
           </div>
         </div>
+        {selectedBookingForRating && <RatingModal booking={selectedBookingForRating} onClose={() => setSelectedBookingForRating(null)} onRatingSubmit={handleRatingSubmit} />}
     </div>
   );
 }

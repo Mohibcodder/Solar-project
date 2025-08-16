@@ -15,6 +15,7 @@ const BookingSchema = new mongoose.Schema({
   trackingId: { type: String, unique: true, default: () => `SRV-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}` },
   images: { before: String, after: String },
   isSubscriptionBooking: { type: Boolean, default: false },
+   rating: { type: Number, min: 1, max: 5, default: null },
   payment: {
       method: { type: String, enum: ['Not Selected', 'Easypaisa', 'Jazzcash', 'Easypaisa/Jazzcash', 'Cash on Delivery'], default: 'Not Selected' },
       status: { type: String, enum: ['Pending', 'Paid'], default: 'Pending' },

@@ -3,6 +3,16 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+import { Star } from 'lucide-react'; // Star icon import karein
+const StarRating = ({ rating }) => {
+    if (!rating) return <span className="text-slate-400 text-xs">Not Rated</span>;
+    return (
+        <div className="flex items-center">
+            {[...Array(rating)].map((_, i) => <Star key={i} size={16} className="text-amber-400" fill="currentColor"/>)}
+            {[...Array(5 - rating)].map((_, i) => <Star key={i} size={16} className="text-slate-300"/>)}
+        </div>
+    );
+};
 export default function HistoryPage() {
     const [allBookings, setAllBookings] = useState([]);
     const [filter, setFilter] = useState('All');
@@ -53,6 +63,7 @@ export default function HistoryPage() {
                             <th className="p-3">Job Status</th>
                             <th className="p-3">Payment</th>
                             <th className="p-3">Technician</th>
+                                <th className="p-3">Rating</th> {/* New Column */}
                         </tr>
                     </thead>
                     <tbody>
@@ -63,6 +74,7 @@ export default function HistoryPage() {
                                 <td className="p-3">{booking.status}</td>
                                 <td className="p-3">{booking.payment.status}</td>
                                 <td className="p-3">{booking.technician?.name || 'N/A'}</td>
+                                <td className="p-3"><StarRating rating={booking.rating} /></td>
                             </tr>
                         ))}
                     </tbody>

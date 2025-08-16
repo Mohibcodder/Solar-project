@@ -1,3 +1,6 @@
+// -------------------------------------------------------------------
+// /app/api/bookings/route.js <- CORRECTED
+// -------------------------------------------------------------------
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import jwt from 'jsonwebtoken';
@@ -7,7 +10,6 @@ import User from '../../../models/User';
 
 export const dynamic = 'force-dynamic';
 
-// GET method remains the same...
 export async function GET() {
   await connectDB();
   const authorization = headers().get('authorization');
@@ -16,21 +18,32 @@ export async function GET() {
     const token = authorization.split(' ')[1];
     try { user = jwt.verify(token, process.env.JWT_SECRET); } catch (error) { user = null; }
   }
-  if (!user) return NextResponse.json({ success: false, message: 'Not authorized' }, { status: 401 });
+
+  if (!user) {
+    return NextResponse.json({ success: false, message: 'Not authorized' }, { status: 401 });
+  }
+
   try {
     let bookings;
+    // --- FIX START: Added specific logic for technicians ---
     if (user.role === 'admin') {
-      bookings = await Booking.find({}).populate('customer');
-    } else {
+      // Admin gets all bookings
+      bookings = await Booking.find({}).populate('customer').populate('technician');
+    } else if (user.role === 'technician') {
+      // Technician gets bookings assigned to them
+      bookings = await Booking.find({ technician: user.userId }).populate('customer');
+    } else { // Customer
+      // Customer gets their own bookings
       bookings = await Booking.find({ customer: user.userId }).populate('technician');
     }
+    // --- FIX END ---
     return NextResponse.json({ success: true, data: bookings });
   } catch (error) {
     return NextResponse.json({ success: false, message: error.message }, { status: 400 });
   }
 }
 
-
+// POST method remains the same
 export async function POST(request) {
   await connectDB();
 
@@ -47,14 +60,12 @@ export async function POST(request) {
   try {
     const { serviceType, address, bookingDate, wantsSubscription } = await request.json();
     
-    // The logic to update the User model has been removed.
-    // Now we save the subscription status directly in the booking.
     const bookingData = { 
         serviceType, 
         address, 
         bookingDate, 
         customer: user.userId,
-        isSubscriptionBooking: wantsSubscription || false // Save subscription status in the booking
+        isSubscriptionBooking: wantsSubscription || false
     };
 
     const booking = await Booking.create(bookingData);
