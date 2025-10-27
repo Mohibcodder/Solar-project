@@ -9,7 +9,7 @@ export default function BookServicePage() {
     const [address, setAddress] = useState('');
     const [bookingDate, setBookingDate] = useState('');
     const [wantsSubscription, setWantsSubscription] = useState(false);
-    
+
     // States for payment modal
     const [modalState, setModalState] = useState({ type: null, bookingId: null });
     const [transactionId, setTransactionId] = useState('');
@@ -21,12 +21,12 @@ export default function BookServicePage() {
         const loadingToast = toast.loading('Creating booking...');
         const token = localStorage.getItem('token');
         try {
-            const { data } = await axios.post('/api/bookings', 
-                { 
-                    serviceType, 
-                    address, 
+            const { data } = await axios.post('/api/bookings',
+                {
+                    serviceType,
+                    address,
                     bookingDate,
-                    wantsSubscription 
+                    wantsSubscription
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -51,13 +51,13 @@ export default function BookServicePage() {
         const loadingToast = toast.loading('Submitting for verification...');
         const token = localStorage.getItem('token');
         try {
-            await axios.put(`/api/bookings/${modalState.bookingId}`, 
-                { 
-                    payment: { 
-                        method: 'Easypaisa/Jazzcash', 
+            await axios.put(`/api/bookings/${modalState.bookingId}`,
+                {
+                    payment: {
+                        method: 'Easypaisa/Jazzcash',
                         status: 'Pending',
                         paymentId: transactionId
-                    } 
+                    }
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -68,12 +68,12 @@ export default function BookServicePage() {
             toast.error('Submission failed. Please try again.', { id: loadingToast });
         }
     };
-    
+
     const handleCodSubmit = async () => {
         const loadingToast = toast.loading('Setting payment method...');
         const token = localStorage.getItem('token');
         try {
-            await axios.put(`/api/bookings/${modalState.bookingId}`, 
+            await axios.put(`/api/bookings/${modalState.bookingId}`,
                 { payment: { method: 'Cash on Delivery', status: 'Pending' } },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -100,7 +100,7 @@ export default function BookServicePage() {
                                 <option>Solar Foundation</option>
                             </select>
                         </div>
-                         <div className="mb-4 p-4 bg-slate-50 rounded-lg text-slate-600">
+                        <div className="mb-4 p-4 bg-slate-50 rounded-lg text-slate-600">
                             <h4 className="font-semibold text-slate-800">Transparent Pricing</h4>
                             <ul className="list-disc list-inside mt-2 text-sm">
                                 <li>Standard Cleaning: 1500</li>
@@ -116,18 +116,26 @@ export default function BookServicePage() {
                         </div>
                         <div>
                             <label className="block text-gray-700">Date & Time</label>
-                            <input type="datetime-local" value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} className="w-full px-3 py-2 border rounded-lg" required />
+                            <input
+                                type="datetime-local"
+                                value={bookingDate}
+                                onChange={(e) => setBookingDate(e.target.value)}
+                                className="w-full px-3 py-2 border rounded-lg"
+                                required
+                                min={new Date().toISOString().slice(0, 16)}
+                            />
                         </div>
+
                         <div className="flex items-center p-4 bg-slate-50 rounded-lg">
-                            <input 
-                                type="checkbox" 
-                                id="subscription" 
-                                checked={wantsSubscription} 
-                                onChange={(e) => setWantsSubscription(e.target.checked)} 
-                                className="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" 
+                            <input
+                                type="checkbox"
+                                id="subscription"
+                                checked={wantsSubscription}
+                                onChange={(e) => setWantsSubscription(e.target.checked)}
+                                className="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                             />
                             <label htmlFor="subscription" className="ml-3 block text-sm text-gray-900">
-                                <span className="font-semibold">Sign up for Annual Subscription ($200/year)</span>
+                                <span className="font-semibold">Sign up for Annual Subscription (1200 RS/year)</span>
                                 <span className="block text-xs text-gray-500">Get priority service and exclusive discounts!</span>
                             </label>
                         </div>
@@ -164,13 +172,13 @@ export default function BookServicePage() {
                                 <form onSubmit={handleTidSubmit}>
                                     <div className="mb-4">
                                         <label className="block text-gray-700">Transaction ID (TID)</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={transactionId}
                                             onChange={(e) => setTransactionId(e.target.value)}
                                             className="w-full px-3 py-2 border rounded-lg"
                                             placeholder="e.g., 1234567890"
-                                            required 
+                                            required
                                         />
                                     </div>
                                     <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
