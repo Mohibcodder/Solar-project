@@ -1,231 +1,201 @@
 "use client";
-import { useState } from 'react';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
-import toast, { Toaster } from 'react-hot-toast';
+import { useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import toast, { Toaster } from "react-hot-toast";
 
-export default function BookServicePage() {
-    const [serviceType, setServiceType] = useState('Solar Panel Cleaning');
-    const [address, setAddress] = useState('');
-    const [bookingDate, setBookingDate] = useState('');
-    const [wantsSubscription, setWantsSubscription] = useState(false);
-    const [phone, setPhone] = useState(''); // ✅ Phone state added
+export default function SignupPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "+92",
+    password: "",
+    confirmPassword: "",
+    role: "customer",
+    expertise: "",
+  });
 
-    // States for payment modal
-    const [modalState, setModalState] = useState({ type: null, bookingId: null });
-    const [transactionId, setTransactionId] = useState('');
+  const router = useRouter();
 
-    const router = useRouter();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-    const handleBookingSubmit = async (e) => {
-        e.preventDefault();
-        if (phone.length !== 10) {
-            toast.error('Please enter a valid 10-digit phone number after +92');
-            return;
-        }
+    // Custom logic for phone number
+    if (name === "phone") {
+      // Ensure it always starts with +92
+      let formattedValue = value.startsWith("+92") ? value : "+92";
 
-        const loadingToast = toast.loading('Creating booking...');
-        const token = localStorage.getItem('token');
-        try {
-            const { data } = await axios.post('/api/bookings', 
-                { 
-                    serviceType, 
-                    address, 
-                    bookingDate,
-                    wantsSubscription,
-                    phone // ✅ include phone number
-                },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            toast.success('Booking created! Please select a payment method.', { id: loadingToast });
-            setModalState({ type: 'select_method', bookingId: data.data._id });
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'Booking failed', { id: loadingToast });
-        }
-    };
+      // Remove any non-digit characters after +92
+      formattedValue = "+92" + formattedValue.slice(3).replace(/\D/g, "");
 
-    const openTransactionModal = () => {
-        setModalState({ ...modalState, type: 'enter_tid' });
-    };
+      // Limit total length to +92 + 10 digits
+      if (formattedValue.length > 13) {
+        formattedValue = formattedValue.slice(0, 13);
+      }
 
-    const handleTidSubmit = async (e) => {
-        e.preventDefault();
-        if (!transactionId.trim()) {
-            toast.error("Please enter a valid Transaction ID.");
-            return;
-        }
-        const loadingToast = toast.loading('Submitting for verification...');
-        const token = localStorage.getItem('token');
-        try {
-            await axios.put(`/api/bookings/${modalState.bookingId}`, 
-                { 
-                    payment: { 
-                        method: 'Easypaisa/Jazzcash', 
-                        status: 'Pending',
-                        paymentId: transactionId
-                    } 
-                },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            toast.success('TID submitted! Admin will approve the payment shortly.', { id: loadingToast });
-            setModalState({ type: null, bookingId: null });
-            router.push('/customer/dashboard');
-        } catch (error) {
-            toast.error('Submission failed. Please try again.', { id: loadingToast });
-        }
-    };
-    
-    const handleCodSubmit = async () => {
-        const loadingToast = toast.loading('Setting payment method...');
-        const token = localStorage.getItem('token');
-        try {
-            await axios.put(`/api/bookings/${modalState.bookingId}`, 
-                { payment: { method: 'Cash on Delivery', status: 'Pending' } },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            toast.success('Cash on Delivery selected.', { id: loadingToast });
-            setModalState({ type: null, bookingId: null });
-            router.push('/customer/dashboard');
-        } catch (error) {
-            toast.error('Failed to set payment method.', { id: loadingToast });
-        }
-    };
+      setFormData((prev) => ({ ...prev, phone: formattedValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
 
-    return (
-        <>
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-                <Toaster />
-                <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-                    <h2 className="text-2xl font-bold text-center mb-6">Schedule Your Service</h2>
-                    <form onSubmit={handleBookingSubmit} className="space-y-4">
-                        
-                        {/* ✅ Service Type */}
-                        <div>
-                            <label className="block text-gray-700">Service Type</label>
-                            <select value={serviceType} onChange={(e) => setServiceType(e.target.value)} className="w-full px-3 py-2 border rounded-lg">
-                                <option>Solar Panel Cleaning</option>
-                                <option>Solar Panel Installation</option>
-                                <option>Solar Foundation</option>
-                            </select>
-                        </div>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-                        {/* ✅ Transparent Pricing Info */}
-                        <div className="mb-4 p-4 bg-slate-50 rounded-lg text-slate-600">
-                            <h4 className="font-semibold text-slate-800">Transparent Pricing</h4>
-                            <ul className="list-disc list-inside mt-2 text-sm">
-                                <li>Standard Cleaning: 1500</li>
-                                <li>Solar Installation: 2500</li>
-                                <li>Solar Foundation: 2000</li>
-                                <li>Annual Subscription: 12000</li>
-                            </ul>
-                        </div>
+    const phoneRegex = /^\+92\d{10}$/;
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
 
-                        {/* ✅ Phone Number */}
-                        <div>
-                            <label className="block text-gray-700">Phone Number</label>
-                            <div className="flex items-center border rounded-lg overflow-hidden">
-                                <span className="bg-gray-200 px-3 py-2 text-gray-700 font-semibold select-none">+92</span>
-                                <input
-                                    type="text"
-                                    value={phone}
-                                    onChange={(e) => {
-                                        const value = e.target.value.replace(/\D/g, "");
-                                        if (value.length <= 10) setPhone(value);
-                                    }}
-                                    className="w-full px-3 py-2 focus:outline-none"
-                                    placeholder="Enter 10-digit number"
-                                    required
-                                />
-                            </div>
-                        </div>
+    if (!phoneRegex.test(formData.phone)) {
+      toast.error(
+        "Phone number must start with +92 and contain exactly 10 digits after it."
+      );
+      return;
+    }
 
-                        {/* ✅ Address */}
-                        <div>
-                            <label className="block text-gray-700">Full Address</label>
-                            <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full px-3 py-2 border rounded-lg" required />
-                        </div>
+    if (!passwordRegex.test(formData.password)) {
+      toast.error(
+        "Password must include 8+ chars, 1 uppercase, 1 lowercase, 1 number, and 1 special symbol."
+      );
+      return;
+    }
 
-                        {/* ✅ Date & Time (Future only) */}
-                        <div>
-                            <label className="block text-gray-700">Date & Time</label>
-                            <input
-                                type="datetime-local"
-                                value={bookingDate}
-                                onChange={(e) => setBookingDate(e.target.value)}
-                                className="w-full px-3 py-2 border rounded-lg"
-                                required
-                                min={new Date().toISOString().slice(0, 16)} // ✅ Prevent past dates
-                            />
-                        </div>
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
 
-                        {/* ✅ Subscription Option */}
-                        <div className="flex items-center p-4 bg-slate-50 rounded-lg">
-                            <input 
-                                type="checkbox" 
-                                id="subscription" 
-                                checked={wantsSubscription} 
-                                onChange={(e) => setWantsSubscription(e.target.checked)} 
-                                className="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" 
-                            />
-                            <label htmlFor="subscription" className="ml-3 block text-sm text-gray-900">
-                                <span className="font-semibold">Sign up for Annual Subscription (1200 RS/year)</span>
-                                <span className="block text-xs text-gray-500">Get priority service and exclusive discounts!</span>
-                            </label>
-                        </div>
+    if (formData.role === "technician" && !formData.expertise) {
+      toast.error("Please select your expertise.");
+      return;
+    }
 
-                        {/* ✅ Submit */}
-                        <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
-                            Proceed to Payment
-                        </button>
-                    </form>
-                </div>
+    const loadingToast = toast.loading("Creating account...");
+    try {
+      await axios.post("/api/auth/signup", formData);
+      toast.success("Account created successfully! Please login.", {
+        id: loadingToast,
+      });
+      router.push("/login");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Signup failed", {
+        id: loadingToast,
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12">
+      <Toaster />
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Create Your Account
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-gray-700">Full Name</label>
+            <input
+              type="text"
+              name="name"
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-lg"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700">Email</label>
+            <input
+              type="email"
+              name="email"
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-lg"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700">Phone Number</label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-lg"
+              required
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Format: +92XXXXXXXXXX (10 digits)
+            </p>
+          </div>
+          <div>
+            <label className="block text-gray-700">Password</label>
+            <input
+              type="password"
+              name="password"
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-lg"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700">Confirm Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-lg"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700">I am a:</label>
+            <select
+              name="role"
+              onChange={handleChange}
+              value={formData.role}
+              className="w-full px-3 py-2 border rounded-lg"
+            >
+              <option value="customer">Customer</option>
+              <option value="technician">Technician</option>
+            </select>
+          </div>
+
+          {formData.role === "technician" && (
+            <div className="transition-all duration-300">
+              <label className="block text-gray-700">Select Expertise:</label>
+              <select
+                name="expertise"
+                onChange={handleChange}
+                value={formData.expertise}
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              >
+                <option value="" disabled>
+                  Choose a category
+                </option>
+                <option value="Solar Panel Cleaning">Solar Panel Cleaning</option>
+                <option value="Solar Panel Installation">
+                  Solar Panel Installation
+                </option>
+                <option value="Solar Foundation">Solar Foundation</option>
+              </select>
             </div>
+          )}
 
-            {/* ✅ Payment Modals */}
-            {modalState.type && (
-                <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-                    <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-                        {modalState.type === 'select_method' && (
-                            <>
-                                <h3 className="text-2xl font-bold mb-6 text-center">Select Payment Method</h3>
-                                <div className="space-y-4">
-                                    <button onClick={openTransactionModal} className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 font-semibold">
-                                        Pay with Easypaisa / Jazzcash
-                                    </button>
-                                    <button onClick={handleCodSubmit} className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 font-semibold">
-                                        Cash on Delivery
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                        {modalState.type === 'enter_tid' && (
-                            <>
-                                <h3 className="text-2xl font-bold mb-4 text-center">Confirm Your Payment</h3>
-                                <p className="text-center text-gray-600 mb-4">
-                                    Please send the payment to <strong className="text-black">0313-4190776</strong> and enter the Transaction ID (TID/TRX ID) you receive via SMS.
-                                </p>
-                                <form onSubmit={handleTidSubmit}>
-                                    <div className="mb-4">
-                                        <label className="block text-gray-700">Transaction ID (TID)</label>
-                                        <input 
-                                            type="text" 
-                                            value={transactionId}
-                                            onChange={(e) => setTransactionId(e.target.value)}
-                                            className="w-full px-3 py-2 border rounded-lg"
-                                            placeholder="e.g., 1234567890"
-                                            required 
-                                        />
-                                    </div>
-                                    <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
-                                        Submit for Verification
-                                    </button>
-                                </form>
-                            </>
-                        )}
-                        <button onClick={() => setModalState({ type: null, bookingId: null })} className="mt-6 w-full text-center text-gray-600 hover:underline">Cancel</button>
-                    </div>
-                </div>
-            )}
-        </>
-    );
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-all"
+          >
+            Sign Up
+          </button>
+        </form>
+        <p className="text-center mt-4">
+          Already have an account?{" "}
+          <Link href="/login" className="text-blue-500">
+            Login
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
 }
